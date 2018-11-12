@@ -21,11 +21,18 @@
 #' # Use varlist() function to get all numeric variables
 #' iv.mult(german_data,y="gb",vars=varlist(german_data,"numeric"))
 
-iv.mult <- function(df,y,summary=FALSE,vars=NULL,verbose=FALSE,rcontrol=NULL) {
+iv.mult <- function(df,y,summary=FALSE,vars=NULL,verbose=FALSE,rcontrol=NULL,naexist=FALSE) {
   if(verbose) {
     cat(paste("Started processing of data frame:", deparse(substitute(df)),"\n"))
   }
   
+  # tell whether there are NAs
+  if(any(is.na(df)) & !naexist) {
+    cat("There are NAs in data frame")
+  }
+  # reset rowname
+  row.names(df) <- 1:nrow(df)
+
   if(is.null(vars)) {
     vars <- names(df)[names(df) !=y]
   }
@@ -33,7 +40,7 @@ iv.mult <- function(df,y,summary=FALSE,vars=NULL,verbose=FALSE,rcontrol=NULL) {
   ivlist <- lapply(vars, function (x) {
       if(is.numeric(df[,x])) {
         if (verbose) cat(paste("Calling iv.num for variable:", x, "\n"))
-        iv.num(df,x,y,verbose=verbose,rcontrol=rcontrol)
+        iv.num(df,x,y,verbose=verbose,rcontrol=rcontrol,naexist=naexist)
       } else {
         if (verbose) cat(paste("Calling iv.str for variable:", x, "\n"))
         iv.str(df,x,y,verbose=verbose)  

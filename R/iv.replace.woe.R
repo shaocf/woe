@@ -21,7 +21,7 @@
 #' x <- iv.replace.woe(german_data,iv.mult(german_data,"gb",vars=varlist(german_data,"numeric")))
 #' str(x)
 
-iv.replace.woe <- function(df,iv,verbose=FALSE) {
+iv.replace.woe <- function(df,iv,verbose=FALSE, naexist=FALSE) {
 
 iv_df <- rbind.fill(iv)
 
@@ -38,10 +38,23 @@ iv_df <- rbind.fill(iv)
    {
      sqlstr <-  paste("select df.*, iv.woe as ", variable_name_woe ," from df join iv_df as iv on (df.", variable_name ," = iv.class and iv.variable ='",variable_name,"')",sep="")
      df <- sqldf(sqlstr,drv="SQLite")
-   } else {
-     sqlstr_woe <- ifelse(paste(n$sql,collapse= " ")=="when  then 0.0" || any(is.infinite(n$woe)) ,"0",paste("case ",paste(n$sql,collapse= " "),"else 0 end"))
-     sqlstr <- paste("select df.*,",sqlstr_woe," as", variable_name_woe, "from df")
-     df <-sqldf(sqlstr,drv="SQLite")
+   } 
+   else 
+   { 
+      if(naexist) # identity whether there are NAs
+      {
+        n_first_line <- n[1,]
+        n <- n[-1,]
+        sqlstr_woe <- ifelse(paste(n$sql,collapse= " ")=="when  then 0.0" || any(is.infinite(n$woe)) ,"0",paste("case ",paste(n$sql,collapse= " "),"else", n_first_line$woe, "end"))
+        sqlstr <- paste("select df.*,",sqlstr_woe," as", variable_name_woe, "from df")
+        df <-sqldf(sqlstr,drv="SQLite")
+      }
+      else
+      {
+        sqlstr_woe <- ifelse(paste(n$sql,collapse= " ")=="when  then 0.0" || any(is.infinite(n$woe)) ,"0",paste("case ",paste(n$sql,collapse= " "),"else 0 end"))
+        sqlstr <- paste("select df.*,",sqlstr_woe," as", variable_name_woe, "from df")
+        df <-sqldf(sqlstr,drv="SQLite")
+      }
    }
 
  }

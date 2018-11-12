@@ -48,3 +48,6 @@ out_rule[i,"tree_node"] <- names(rpart.rules)[i]
 
 out_rule
 }
+
+
+

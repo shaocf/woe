@@ -13,14 +13,21 @@
 #' iv.num(german_data,"age","gb")
 #' iv.num(german_data,"age","gb")
 
-iv.num <- function(df,x,y,verbose=FALSE,rcontrol=NULL) {
+iv.num <- function(df,x,y,verbose=FALSE,rcontrol=NULL,naexist=FALSE) {
 
   if(verbose) cat("  Building rpart model",sep="\n")
+
+  # here dealing with missing value
+  if(naexist) {
+    df_orig <- df
+    df <- na.omit(df)
+  }
+
   #rcontrol <- ifelse(is.null(rcontrol),rpart.control(cp=0.001,minbucket=nrow(df)/10),rcontrol)
   if(is.null(rcontrol)) {
     rcontrol <- rpart.control(cp=0.001,minbucket=nrow(df)/10)
   }
-  model   <- rpart(data=df,formula=as.integer(df[,y])~df[,x],control=rcontrol)
+  model <- rpart(data=df,formula=as.integer(df[,y])~df[,x],control=rcontrol)
   if(verbose) cat("  Model finished",sep="\n")
   model_where <- data.frame(node_id=model$where,obs_id=as.numeric(names(model$where)),stringsAsFactors=F) # str(model_where)
   model_frame <- data.frame(model$frame,tree_node=rownames(model$frame),node_id=row(model$frame["var"]))
@@ -38,16 +45,30 @@ iv.num <- function(df,x,y,verbose=FALSE,rcontrol=NULL) {
                   model_where mw
                   join model_frame mf using (node_id)        
                   join tree_rules tr using (tree_node)")
-  t$tmp_iv_calc_label <- factor(t$tmp_iv_calc_label)
-
+ 
   if(verbose) cat("    DF Merge",sep="\n")
-  df <- merge(df, t["tmp_iv_calc_label"], by=0, all=TRUE) # str(df)
+
+  # the different ways we dealing with data according to whether there are NAs
+  if(naexist) {
+    df <- merge(df_orig, t, by.x="row.names", by.y="obs_id", all.x=TRUE) # str(df)
+    df$tmp_iv_calc_label[is.na(df$tmp_iv_calc_label)] <- "NA"
+  } else {
+    df <- merge(df, t["tmp_iv_calc_label"], by=0, all=TRUE)
+  }
+  
+  df$tmp_iv_calc_label <- factor(df$tmp_iv_calc_label)
+
   if(verbose) cat("  Calling iv.str for nodes",sep="\n")
   iv_data <- iv.str(df,"tmp_iv_calc_label",y)
 
   if(verbose) cat("  Formatting output",sep="\n")
   iv_data$variable <- x
 
-  sqldf("select iv.*, tr.sql || woe as sql from iv_data iv join tree_rules tr on (iv.class=tr.class_label) order by tr.min")
+  # add "left outer join" 
+  library(dplyr)
+
+  tree_rules <- arrange(tree_rules, max)
+  tree_rules <- tree_rules %>% mutate(num = 1:nrow(tree_rules))
+  sqldf("select iv.*, tr.sql || woe as sql from iv_data iv left outer join tree_rules tr on (iv.class=tr.class_label) order by tr.num")
 }
 
