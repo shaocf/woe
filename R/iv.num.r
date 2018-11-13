@@ -65,7 +65,7 @@ iv.num <- function(df,x,y,verbose=FALSE,rcontrol=NULL,naexist=FALSE) {
   iv_data$variable <- x
 
   # add "left outer join" 
-  tree_rules <- tree_rules[order(max), ]
+  tree_rules <- tree_rules[order(tree_rules[, "max"]), ]
   tree_rules$num <- 1:nrow(tree_rules)
   sqldf("select iv.*, tr.sql || woe as sql from iv_data iv left outer join tree_rules tr on (iv.class=tr.class_label) order by tr.num")
 }
