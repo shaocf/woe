@@ -18,10 +18,8 @@ iv.num <- function(df,x,y,verbose=FALSE,rcontrol=NULL) {
   if(verbose) cat("  Building rpart model",sep="\n")
 
   # here dealing with missing value
-  if(any(is.na(df[,x]))) {
-    df_orig <- df
-    df <- na.omit(df[,c(x, y)])
-  }
+  df_orig <- df
+  df <- na.omit(df[,c(x, y)])
 
   #rcontrol <- ifelse(is.null(rcontrol),rpart.control(cp=0.001,minbucket=nrow(df)/10),rcontrol)
   if(is.null(rcontrol)) {
