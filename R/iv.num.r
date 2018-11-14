@@ -18,9 +18,9 @@ iv.num <- function(df,x,y,verbose=FALSE,rcontrol=NULL,naexist=FALSE) {
   if(verbose) cat("  Building rpart model",sep="\n")
 
   # here dealing with missing value
-  if(naexist) {
+  if(length(is.na(df[,x]) > 0)) {
     df_orig <- df
-    df <- na.omit(df)
+    df <- na.omit(df[,c(x, y)])
   }
 
   #rcontrol <- ifelse(is.null(rcontrol),rpart.control(cp=0.001,minbucket=nrow(df)/10),rcontrol)
@@ -49,12 +49,8 @@ iv.num <- function(df,x,y,verbose=FALSE,rcontrol=NULL,naexist=FALSE) {
   if(verbose) cat("    DF Merge",sep="\n")
 
   # the different ways we dealing with data according to whether there are NAs
-  if(naexist) {
-    df <- merge(df_orig, t, by.x="row.names", by.y="obs_id", all.x=TRUE) # str(df)
-    df$tmp_iv_calc_label[is.na(df$tmp_iv_calc_label)] <- "NA"
-  } else {
-    df <- merge(df, t["tmp_iv_calc_label"], by=0, all=TRUE)
-  }
+  df <- merge(df_orig, t, by.x="row.names", by.y="obs_id", all.x=TRUE) # str(df)
+  df$tmp_iv_calc_label[is.na(df$tmp_iv_calc_label)] <- "NA"
   
   df$tmp_iv_calc_label <- factor(df$tmp_iv_calc_label)
 
