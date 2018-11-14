@@ -26,10 +26,6 @@ iv.mult <- function(df,y,summary=FALSE,vars=NULL,verbose=FALSE,rcontrol=NULL) {
     cat(paste("Started processing of data frame:", deparse(substitute(df)),"\n"))
   }
   
-  # tell whether there are NAs
-  if(any(is.na(df))) {
-    cat("There are NAs in data frame")
-  }
   # reset rowname
   row.names(df) <- 1:nrow(df)
 
@@ -40,7 +36,7 @@ iv.mult <- function(df,y,summary=FALSE,vars=NULL,verbose=FALSE,rcontrol=NULL) {
   ivlist <- lapply(vars, function (x) {
       if(is.numeric(df[,x])) {
         if (verbose) cat(paste("Calling iv.num for variable:", x, "\n"))
-        iv.num(df,x,y,verbose=verbose,rcontrol=rcontrol,naexist=naexist)
+        iv.num(df,x,y,verbose=verbose,rcontrol=rcontrol)
       } else {
         if (verbose) cat(paste("Calling iv.str for variable:", x, "\n"))
         iv.str(df,x,y,verbose=verbose)  
