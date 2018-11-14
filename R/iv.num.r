@@ -13,12 +13,12 @@
 #' iv.num(german_data,"age","gb")
 #' iv.num(german_data,"age","gb")
 
-iv.num <- function(df,x,y,verbose=FALSE,rcontrol=NULL,naexist=FALSE) {
+iv.num <- function(df,x,y,verbose=FALSE,rcontrol=NULL) {
 
   if(verbose) cat("  Building rpart model",sep="\n")
 
   # here dealing with missing value
-  if(length(is.na(df[,x]) > 0)) {
+  if(any(is.na(df[,x]))) {
     df_orig <- df
     df <- na.omit(df[,c(x, y)])
   }
