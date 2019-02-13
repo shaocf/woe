@@ -44,7 +44,8 @@ iv.str <- function(df,x,y,verbose=FALSE) {
   outcome_0 <- outcome_1 <- NULL # This is needed to avoid NOTES about not visible binding from R CMD check
   
   total_0 <- nrow(df) - total_1      
-  iv_data <- data.frame(unclass(table(df[, x],df[, y])))
+  df[, x][is.na(df[, x])] <- "NA"
+  iv_data <- data.frame(unclass(table(df[, x], df[, y])))
   
   if (all(names(iv_data)==c("bad","good"))) {
     iv_data <- iv_data[,c(2,1)]

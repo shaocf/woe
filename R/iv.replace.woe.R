@@ -36,12 +36,13 @@ iv_df <- rbind.fill(iv)
  
    if(!("sql" %in% colnames(n)))
    {
+     df[, variable_name][is.na(df[, variable_name])] <- "NA"
      sqlstr <-  paste("select df.*, iv.woe as ", variable_name_woe ," from df join iv_df as iv on (df.", variable_name ," = iv.class and iv.variable ='",variable_name,"')",sep="")
      df <- sqldf(sqlstr,drv="SQLite")
    } else 
     { 
       if(any(is.na(df[,variable_name]))) # identity whether there are NAs
-      {
+      { 
         n_first_line <- n[1,]
         n <- n[-1,]
         sqlstr_woe <- ifelse(paste(n$sql,collapse= " ")=="when  then 0.0" || any(is.infinite(n$woe)) ,"0",paste("case ",paste(n$sql,collapse= " "),"else", n_first_line$woe, "end"))
