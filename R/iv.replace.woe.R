@@ -36,7 +36,10 @@ iv_df <- rbind.fill(iv)
  
    if(!("sql" %in% colnames(n)))
    {
-     df[, variable_name][is.na(df[, variable_name])] <- "NA"
+     if(any(is.na(df[, variable]))) {
+       df[, variable_name][is.na(df[, variable_name])] <- "NA"
+     }
+     
      sqlstr <-  paste("select df.*, iv.woe as ", variable_name_woe ," from df join iv_df as iv on (df.", variable_name ," = iv.class and iv.variable ='",variable_name,"')",sep="")
      df <- sqldf(sqlstr,drv="SQLite")
    } else 
