@@ -36,7 +36,7 @@ iv_df <- rbind.fill(iv)
  
    if(!("sql" %in% colnames(n)))
    {
-     if(any(is.na(df[, variable]))) {
+     if(any(is.na(df[, variable_name]))) {
        df[, variable_name][is.na(df[, variable_name])] <- "NA"
      }
      
